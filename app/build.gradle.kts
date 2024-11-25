@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "fr.enssat.singwithme.MdNs"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "fr.enssat.singwithme.MdNs"
