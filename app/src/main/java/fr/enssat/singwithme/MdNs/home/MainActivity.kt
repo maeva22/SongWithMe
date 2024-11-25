@@ -1,4 +1,4 @@
-package fr.enssat.singwithme.MdNs
+package fr.enssat.singwithme.MdNs.home
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
