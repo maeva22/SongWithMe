@@ -14,7 +14,7 @@ data class ListMusic(
     val locked: Boolean
 )
 
-private fun parseJSON(jsonString: String) {
+public fun parseJSON(jsonString: String) {
     // Define the Gson Object
     val gson = Gson()
     val listType = object : TypeToken<List<ListMusic>>() {}.type
@@ -40,7 +40,7 @@ data class LyricLine(
     val text: String       // Texte de la ligne
 )
 
-fun parseMd(MdString: String) {
+fun parseMd(MdString: String): Karaoke {
     // Lire le fichier Markdown
     val markdown = URL(MdString).readText().lines()
     val lyrics = mutableListOf<LyricLine>()
@@ -66,6 +66,7 @@ fun parseMd(MdString: String) {
     // Afficher les résultats
     println("Paroles :")
     song.lyrics.forEach {println(it.text)}
+    return song
 }
 
 fun main() {
