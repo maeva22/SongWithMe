@@ -37,14 +37,12 @@ data class Karaoke(
 
 // Classe pour représenter une ligne de paroles
 data class LyricLine(
-    val timestamp: String, // Minutage { mm:ss }
     val text: String       // Texte de la ligne
 )
 
 fun parseMd(MdString: String) {
     // Lire le fichier Markdown
     val markdown = URL(MdString).readText().lines()
-
     val lyrics = mutableListOf<LyricLine>()
 
     // Variable pour détecter la section actuelle
@@ -56,25 +54,18 @@ fun parseMd(MdString: String) {
             line.startsWith("# lyrics") -> {
                 currentSection = "lyrics"
             }
-            currentSection == "lyrics" && line.contains(Regex("""\{\s*\d+:\d+\s*\}""")) -> {
-                // Extraire les minutages et le texte
-                val regex = Regex("""\s*(\d+:\d+)\s*(.*)""")
-                val match = regex.find(line)
-                if (match != null) {
-                    val timestamp = match.groupValues[1].trim()
-                    val text = match.groupValues[2].trim()
-                    lyrics.add(LyricLine(timestamp,text))
-                }
+            currentSection == "lyrics" -> {
+                // Extraire le texte
+                val text = line
+                lyrics.add(LyricLine(text.toString()))
             }
         }
     }
-
     // Créer l'objet Song
     val song = Karaoke(lyrics)
-
     // Afficher les résultats
     println("Paroles :")
-    song.lyrics.forEach { println("${it.timestamp} -> ${it.text}") }
+    song.lyrics.forEach {println(it.text)}
 }
 
 fun main() {
