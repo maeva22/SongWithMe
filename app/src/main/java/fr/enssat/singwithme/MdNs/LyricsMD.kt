@@ -22,6 +22,7 @@ data class LyricLine(
 )
 
 fun dowloadMd(context: Context, mdPath: String): String? {
+
     val client = OkHttpClient()
     val request = Request.Builder().url(BASE_URL+mdPath).build()
     val lyricsFile = File(context.cacheDir, mdPath.substringAfterLast('/'))
@@ -33,15 +34,19 @@ fun dowloadMd(context: Context, mdPath: String): String? {
     }
 
     try {
+        var fileContent : String? = null
+        Thread {
         val response = client.newCall(request).execute()
         if (response.isSuccessful) {
-            val fileContent = response.body?.string()
+            fileContent = response.body?.string()
             fileContent?.let {
                 lyricsFile.writeText(it)
                 println("Fichier téléchargé et sauvegardé : ${lyricsFile.absolutePath}")
             }
-            return fileContent
         }
+        }.start()
+            return fileContent
+
     } catch (e: IOException) {
         e.printStackTrace()
     }
