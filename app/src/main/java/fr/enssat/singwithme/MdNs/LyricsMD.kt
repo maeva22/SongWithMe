@@ -13,12 +13,7 @@ import java.net.URL
  */
 
 data class Karaoke(
-    val lyrics: List<LyricLine>
-)
-
-// Classe pour représenter une ligne de paroles
-data class LyricLine(
-    val text: String       // Texte de la ligne
+    val text: String
 )
 
 fun dowloadMd(context: Context, mdPath: String): String? {
@@ -55,24 +50,9 @@ fun dowloadMd(context: Context, mdPath: String): String? {
 }
 
 
-fun parseMd(mdContent: String): Karaoke {
-    val lines = mdContent.lines()
-    val lyrics = mutableListOf<LyricLine>()
-
-    for (line in lines) {
-        when {
-            line.startsWith("{") -> {
-                val timingEndIndex = line.indexOf('}')
-                if (timingEndIndex != -1) {
-                    val text = line.substring(timingEndIndex + 1).trim()
-                    lyrics.add(LyricLine(text))
-                }
-            }
-        }
-    }
-
-    println("Paroles extraites : ${lyrics.map { it.text }}")
-    return Karaoke(lyrics)
+fun parseMd(mdContent: String): String {
+    val lines = mdContent
+    return lines
 }
 
 
