@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import fr.enssat.singwithme.MdNs.ErrorConnexion
 import fr.enssat.singwithme.MdNs.ListMusic
 import fr.enssat.singwithme.MdNs.LyricsScreen
 import fr.enssat.singwithme.MdNs.SongsList
@@ -40,6 +41,9 @@ fun AppNavigation(
         ) { backStackEntry ->
             val songPath = backStackEntry.arguments?.getString("songPath")
             LyricsScreen(songPath = songPath?: "", navController = navController)
+        }
+        composable(route = "ErrorPage") {
+            ErrorConnexion()
         }
     }
 }

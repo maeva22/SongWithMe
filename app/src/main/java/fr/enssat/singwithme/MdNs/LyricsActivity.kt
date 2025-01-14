@@ -70,6 +70,11 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
             ) {
                 Text(text = "Retour")
             }
+            Text(
+                text = "Les paroles sont actuellement indisponible !",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(16.dp)
+            )
         }
     }
 }
