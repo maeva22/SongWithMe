@@ -13,9 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -29,9 +27,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import okhttp3.internal.wait
-import kotlin.concurrent.thread
 
 
 const val BASE_URL = "https://gcpa-enssat-24-25.s3.eu-west-3.amazonaws.com/"
@@ -53,7 +48,6 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
             ) {
                 Text(text = "Retour")
             }
-            Countdown()
             ElevatedButton(
                 onClick = { launchMusic.value = !launchMusic.value }
             ) {
@@ -74,18 +68,8 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
                     val parole = transformToData(textSong)
 
                     KarokeBox(parole)
-
-
-                    // récupère les valeur de la ligne de musique
-                    //for ( line in parole){
-                    //    LaunchedEffect(line.txt) { delay((duration).toLong()) }
-
-                    //}
                 }
-
             }
-
-
         }
     } else {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -177,154 +161,3 @@ fun KarokeBox(parole: List<ParoleParse>){
     KaraokeSimpleTextAnimate(duration,text,indexString)
 }
 
-@Composable
-fun KarokeBox0(parole: List<ParoleParse>){
-
-    var indexString by remember { mutableStateOf(1) }
-    var karaokeAnimation = remember { Animatable(0f) }
-    var width by remember { mutableIntStateOf(0) }
-    var height by remember { mutableIntStateOf(0) }
-    var duration by remember { mutableIntStateOf(0) }
-    var progress by remember { mutableFloatStateOf(0f) }
-
-
-    var text = parole[indexString].txt
-
-
-    LaunchedEffect(indexString) {
-
-        if (indexString < parole.size) {
-            // Attendre 1 seconde avant de réduire la valeur
-            delay(duration.toLong())
-            duration = parole[indexString].timerEnd - parole[indexString].timerStart
-            duration *= 2
-            text = parole[indexString].txt
-            karaokeAnimation.animateTo(1f, tween(duration, easing = LinearEasing))
-
-            indexString += 1
-        }
-    }
-    progress = karaokeAnimation.value
-
-    Box(Modifier.padding(Dp(50f))) {
-        Text(
-            text = text,
-            color = Color.Red,
-
-            modifier = Modifier.onSizeChanged {
-                width = it.width
-                height = it.height
-            },//.width(width.pxToDp()).height(width.pxToDp()),
-            textAlign = TextAlign.Left
-        )
-        Surface(
-            color = Color.Magenta, modifier = Modifier
-                .width(((width + 15).pxToDp()))
-                .height(height.pxToDp())
-                .padding(
-                    start = width.pxToDp() * progress,
-                    end = width.pxToDp() - (width.pxToDp() * progress)
-                )
-        ) {}
-        Text(
-            text = text,
-            color = Color.Blue,
-            modifier = Modifier.width(width.pxToDp() * progress),
-            textAlign = TextAlign.Left,
-            softWrap = false
-        )
-    }
-}
-
-
-@Composable
-fun KarokeBoxS(Txt: String, duration : Int, key: Int){
-    var karaokeAnimation = remember { Animatable(0f) }
-    var width by remember { mutableIntStateOf(0) }
-    var height by remember { mutableIntStateOf(0) }
-    var progress by remember { mutableFloatStateOf(0f) }
-
-    LaunchedEffect(key) {
-        karaokeAnimation.animateTo(1f, tween(duration, easing = LinearEasing))
-    }
-
-    progress = karaokeAnimation.value
-
-    Box(Modifier.padding(Dp(50f))) {
-        Text(
-            text = Txt,
-            color = Color.Red,
-
-            modifier = Modifier.onSizeChanged {
-                width = it.width
-                height = it.height
-            },//.width(width.pxToDp()).height(width.pxToDp()),
-            textAlign = TextAlign.Left
-        )
-        Surface(
-            color = Color.Magenta, modifier = Modifier
-                .width(((width + 15).pxToDp()))
-                .height(height.pxToDp())
-                .padding(
-                    start = width.pxToDp() * progress,
-                    end = width.pxToDp() - (width.pxToDp() * progress)
-                )
-        ) {}
-        Text(
-            text = Txt,
-            color = Color.Blue,
-            modifier = Modifier.width(width.pxToDp() * progress),
-            textAlign = TextAlign.Left,
-            softWrap = false
-        )
-    }
-
-}
-
-@Composable
-fun KarokeBox12(parole: List<ParoleParse>){
-
-    var indexString by remember { mutableStateOf(1) }
-
-
-    var duration by remember { mutableIntStateOf(0) }
-    var text = parole[indexString].txt
-    LaunchedEffect(indexString) {
-        duration = parole[indexString].timerEnd - parole[indexString].timerStart
-        duration *= 10
-        var t = duration
-        t+=1
-        if (indexString < parole.size) {
-            // Attendre 1 seconde avant de réduire la valeur
-            delay(duration.toLong())
-
-            text = parole[indexString].txt
-
-
-            indexString += 1
-        }
-    }
-    KaraokeSimpleTextAnimate(duration,text,indexString)
-
-
-
-}
-
-
-@Composable
-fun Countdown() {
-    // Variable d'état pour stocker le nombre restant
-    var countdownValue by remember { mutableStateOf(5) }
-
-    // Lancer une coroutine avec LaunchedEffect
-    LaunchedEffect(countdownValue) {
-        if (countdownValue > 0) {
-            // Attendre 1 seconde avant de réduire la valeur
-            delay(1000)
-            countdownValue -= 1
-        }
-    }
-
-    // Afficher le nombre actuel du décompte
-    Text(text = "$countdownValue")
-}
