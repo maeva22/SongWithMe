@@ -57,21 +57,16 @@ private fun CardSong(song: ListMusic, modifier: Modifier = Modifier, navControll
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primary
         ),
-        modifier = modifier
-            .padding(vertical = 4.dp, horizontal = 8.dp)
-            .clickable {
-                if (song.path == null){
-                    navController.navigate("lyrics/${Uri.encode("null")}")
-                }else {
-                    song.path?.let { path ->
-                        navController.navigate("lyrics/${Uri.encode(path)}")
-                    }
-                }
+        onClick = {
+            if (song.path == null){
+                navController.navigate("lyrics/${Uri.encode("null")}")
+            }else {
+                    navController.navigate("lyrics/${Uri.encode(song.path)}")
             }
+        },
+        modifier = modifier.padding(vertical = 4.dp, horizontal = 8.dp)
     ) {
-
             CardContent(song)
-
         }
     }
 
@@ -103,62 +98,3 @@ fun CardContent(song: ListMusic) {
         }
     }
 }
-
-/*
-    //"{ 0:19 }A better place to play?{ 0:21 }";
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            SongWithMeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) {
-                    KaraokeSimpleTextAnimate(
-                        30000,
-                        "What the hell i'm doing here"
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun Int.pxToDp() = with(LocalDensity.current) { this@pxToDp.toDp() }
-
-@Composable
-fun KaraokeSimpleText(text: String, progress: Float) {
-    var width by remember { mutableIntStateOf(0) }
-    var height by remember { mutableIntStateOf(0) }
-
-    Box(Modifier.padding(Dp(50f))){
-        Text(
-            text=text,
-            color = Color.Red,
-            modifier = Modifier.onSizeChanged { width = it.width
-                                                height = it.height},
-            textAlign = TextAlign.Left
-        )
-        Surface(color=Color.Magenta,  modifier = Modifier.width(((width+15).pxToDp())).height(height.pxToDp()).padding(start = width.pxToDp()*progress,end=width.pxToDp()-(width.pxToDp()*progress))){}
-        Text(
-            text=text,
-            color = Color.White,
-            modifier = Modifier.width(width.pxToDp()*progress),
-            textAlign = TextAlign.Left,
-            softWrap = false
-        )
-
-    }
-    Log.d("LectureString","Width : $width , Progress : $progress")
-
-}
-@Composable
-fun KaraokeSimpleTextAnimate(duration: Int, text: String)  {
-    val karaokeAnimation = remember { Animatable(0f) }
-    LaunchedEffect(Unit) {
-        karaokeAnimation.animateTo(1f, tween(duration, easing = LinearEasing))
-    }
-    Log.d("LectureString","Animation : ${karaokeAnimation.value}")
-    KaraokeSimpleText(text, karaokeAnimation.value)
-}
-*/
