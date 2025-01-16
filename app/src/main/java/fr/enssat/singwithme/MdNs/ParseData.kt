@@ -18,6 +18,7 @@ fun tabToString(textsong: String) : String {
     }
     return tps
 }
+
 fun timeCodeToMs(timeCode : String) : Int{
     return (timeCode.split(':')[0]).toInt()*60000 + (timeCode.split(':')[1]).toInt()*1000
 }
