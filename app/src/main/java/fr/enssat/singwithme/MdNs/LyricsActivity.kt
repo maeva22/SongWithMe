@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,7 +42,7 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
     if (songPath != "null") {
         val mdContent = dowloadMd(context, songPath.toString())
         val karaoke = mdContent?.let { parseMd(it) }
-        val launchMusic = remember { mutableStateOf(false) }
+        val launchMusic = rememberSaveable  { mutableStateOf(false) }
         // Affichage de l'écran
         Column(modifier = Modifier.padding(16.dp)) {
             // Bouton pour revenir à la liste des chansons
@@ -141,8 +142,9 @@ fun KaraokeSimpleText(text: String, progress: Float) {
 @Composable
 fun KaraokeSimpleTextAnimate(Dataline:ParoleParse, indice: Int) {
 
-    val karaokeAnimation = remember { Animatable(0f) }
-    var TargetValue by remember { mutableFloatStateOf(0f) }
+    val karaokeAnimation = remember  { Animatable(0f) }
+    var TargetValue by rememberSaveable  { mutableFloatStateOf(0f) }
+    var savedValue by rememberSaveable  { mutableFloatStateOf(0f) }
     val text = Dataline.totalText
 
     LaunchedEffect(Dataline,indice) { // Valeur différente a chaque appel pour "reset le truic ! "
@@ -170,15 +172,15 @@ fun KaraokeSimpleTextAnimate(Dataline:ParoleParse, indice: Int) {
         }
 
     }
-
+   savedValue = karaokeAnimation.value
    // Log.d("LectureString", "Animation : ${karaokeAnimation.value}")
-    KaraokeSimpleText(text, karaokeAnimation.value)
+    KaraokeSimpleText(text, savedValue)
 }
 @Composable
 fun KarokeBox(parole: List<ParoleParse>){
 
-    var indexString by remember { mutableIntStateOf(0) }
-    var indice by remember { mutableIntStateOf(0) }
+    var indexString by rememberSaveable  { mutableIntStateOf(0) }
+    var indice by rememberSaveable  { mutableIntStateOf(0) }
 
     val DataLine = parole[indexString]
 
