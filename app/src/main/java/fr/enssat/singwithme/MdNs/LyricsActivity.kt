@@ -1,5 +1,6 @@
 package fr.enssat.singwithme.MdNs
 
+import android.provider.ContactsContract.Data
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -98,18 +99,18 @@ fun Int.pxToDp() = with(LocalDensity.current) { this@pxToDp.toDp() }
 fun KaraokeSimpleText(text: String, progress: Float) {
     var width by remember { mutableIntStateOf(0) }
     var height by remember { mutableIntStateOf(0) }
-    //Log.d("LectureString", " Width : $width / Height: $height Progress : $progress")
 
-    Box(Modifier.padding(Dp(50f))) {
+    Box(Modifier.padding(Dp(5f))) {
         Text(
             text = text,
             color = Color.Red,
+            softWrap = false,
             modifier = Modifier.onSizeChanged {
                 width = it.width
                 height = it.height
-                Log.d("Verif Change" , " Width : $width / Height: $height")
             },
             textAlign = TextAlign.Left
+
         )
 
         Surface(
@@ -118,8 +119,9 @@ fun KaraokeSimpleText(text: String, progress: Float) {
                 .height(height.pxToDp())
                 .padding(
                     start = width.pxToDp() * progress,
-                    end = width.pxToDp() - (width.pxToDp() * progress)
-
+                    end = width.pxToDp() - (width.pxToDp() * progress),
+                    //top= 152.pxToDp(),
+                    //bottom = 0.pxToDp()
                 )
         ) {}
 
@@ -137,71 +139,70 @@ fun KaraokeSimpleText(text: String, progress: Float) {
 }
 
 @Composable
-fun KaraokeSimpleTextAnimate(List:List<ParoleParse>) {
+fun KaraokeSimpleTextAnimate(Dataline:ParoleParse, indice: Int) {
 
     val karaokeAnimation = remember { Animatable(0f) }
-
-    var index by remember { mutableIntStateOf(0) }
     var TargetValue by remember { mutableFloatStateOf(0f) }
-    var text= ""
+    val text = Dataline.totalText
 
-    for (line in List){
-        text += line.txt;
+    LaunchedEffect(Dataline,indice) { // Valeur différente a chaque appel pour "reset le truic ! "
+        if(Dataline != ParoleParse()){
+            if(indice == 0){
+                karaokeAnimation.snapTo(0f)
+                TargetValue=0f
+            }
+            val duration = Dataline.timerEnd[indice] - Dataline.timerStart[indice]
+            var len = (Dataline.txt[indice].length).toFloat()
+            TargetValue += ((Dataline.txt[indice].length).toFloat() / (Dataline.totalLetter).toFloat())
+
+            if(TargetValue!=1f){
+                Log.d("verif","oh")
+            }
+
+            karaokeAnimation.animateTo(TargetValue, tween(duration, easing = LinearEasing))
+
+            Log.d("LectureString", "-----------------------------------")
+            Log.d("LectureString", "TargetValue : ${TargetValue}")
+            Log.d("LectureString", "len : ${len}")
+            Log.d("LectureString", "indice : ${indice}")
+            Log.d("LectureString", "text : ${text}")
+
+        }
+
     }
 
-    LaunchedEffect(UInt,index) { // Valeur différente a chaque appel pour "reset le truic ! "
-
-        karaokeAnimation.snapTo(0f)
-        var letmot = 0
-        for(i in 0..<List.size){
-            letmot+= List[i].txt.length
-        }
-
-        TargetValue = 0f
-        TargetValue = (List[index].txt.length / letmot).toFloat()
-
-        if(TargetValue>1){
-            Log.d("ERROR", "Target Value :$TargetValue / WordLen :${List[index].txt.length} / Word total :$letmot")
-        }
-
-        val duration = (List[index].timerEnd- List[index].timerStart )
-        karaokeAnimation.animateTo(TargetValue, tween(duration, easing = LinearEasing))
-
-        if (index < List.size-1) {
-            delay(duration.toLong())  // Attendre la durée de l'animation
-            index += 1  // Incrémenter l'indice pour le texte suivant
-        }
-    }
-
+   // Log.d("LectureString", "Animation : ${karaokeAnimation.value}")
     KaraokeSimpleText(text, karaokeAnimation.value)
 }
 @Composable
 fun KarokeBox(parole: List<ParoleParse>){
 
-    var indexString by remember { mutableStateOf(1) }
-    var nbletter by remember { mutableStateOf(1) }
-    val line = parole[indexString]
+    var indexString by remember { mutableIntStateOf(0) }
+    var indice by remember { mutableIntStateOf(0) }
 
-    val tps by remember { mutableStateOf(mutableListOf<ParoleParse>())   }
+    val DataLine = parole[indexString]
 
-    LaunchedEffect(indexString) {
-        nbletter=0
-        tps.clear()
-        var decal = indexString
-        while(!parole[decal].end) {
-            nbletter+=parole[decal].txt.length
-            tps.add(parole[decal])
-            decal+=1
-        }
-        tps.add(parole[decal])
+    LaunchedEffect(indexString,indice) {
+            if (indexString < parole.size) {
+                val duration = DataLine.timerEnd[indice] - DataLine.timerStart[indice]
 
-        if (decal+1 < parole.size) {
-            delay((tps.last().timerEnd - tps.first().timerStart).toLong())  // Attendre la durée de l'animation
-            indexString = decal+1  // Incrémenter l'indice pour le texte suivant
-        }
+                delay(duration.toLong()) // Attendre la durée de l'animation
+
+                if( indice < DataLine.txt.size-1 ){
+                    indice+=1
+                }else{
+                    indexString += 1  // Incrémenter l'indice pour le texte suivant
+                    indice =0
+                }
+
+
+
+            }
+
+
     }
 
-    KaraokeSimpleTextAnimate(tps)
+    KaraokeSimpleTextAnimate(DataLine,indice)
 
 
 }

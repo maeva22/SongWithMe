@@ -1,14 +1,16 @@
 package fr.enssat.singwithme.MdNs
 
 data class ParoleParse(
-    val txt: String,
-    val timerStart: Int,
-    val timerEnd: Int,
-    val end : Boolean
+    var txt: MutableList<String> = mutableListOf<String>(),
+    var timerStart: MutableList<Int> = mutableListOf<Int>(),
+    var timerEnd: MutableList<Int> = mutableListOf<Int>(),
+    var totalLetter: Int = 0,
+    var totalText: String = "",
+    var totalTimer: Int=0
 )
 
-fun initParoleParle(txt: String, timerStart: Int, timerEnd: Int, end : Boolean) : ParoleParse{
-    return ParoleParse(txt = txt, timerStart = timerStart, timerEnd =  timerEnd, end = end)
+fun initParoleParle() : ParoleParse{
+    return ParoleParse()
 }
 
 fun tabToString(textsong: String) : String {
@@ -29,22 +31,26 @@ fun transformToData(textsong:String): MutableList<ParoleParse> {
 
     val result: Sequence<MatchResult>  =  regex.findAll(textsong)
 
-    val tab: MutableList<ParoleParse> = mutableListOf(
-        ParoleParse(txt = "start", timerStart = 0, timerEnd = 0, end = true)
-    )
+    val tab: MutableList<ParoleParse> = mutableListOf(ParoleParse())
+    tab.add(ParoleParse())
     for(pack in result){
         val check =  pack.groups[2]!!.value.indexOf("\n")!=-1 || pack.groups[4] !=null
-        tab.add(
-            ParoleParse(txt = pack.groups[2]!!.value.replace('\n',' ') ,
-                timerStart =timeCodeToMs(pack.groups[1]!!.value) ,
-                timerEnd =timeCodeToMs(pack.groups[3]!!.value), end =check )
-        )
-    }
 
-    for( line in tab ){
-        print( line.timerStart.toString() + " / " + line.timerEnd.toString() + " : " + line .txt )
-        if( line.end) print('\n')
+
+        tab.last().txt.add( pack.groups[2]!!.value.replace('\n',' '))
+        tab.last().totalText+=tab.last().txt.last()
+        tab.last().timerStart.add( timeCodeToMs(pack.groups[1]!!.value))
+        tab.last().timerEnd.add( timeCodeToMs(pack.groups[3]!!.value))
+
+        if(check){
+            val totaltimer = tab.last().timerEnd.last() - tab.last().timerStart.first()
+            tab.last().totalTimer = totaltimer
+            tab.last().totalLetter = tab.last().totalText.length
+            tab.add(ParoleParse())
+        }
+
     }
+    tab.removeFirst()
     return tab
 
 }
