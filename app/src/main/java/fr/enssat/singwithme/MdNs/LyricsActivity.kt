@@ -1,5 +1,6 @@
 package fr.enssat.singwithme.MdNs
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -25,8 +26,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
+import java.io.File
 
 
 const val BASE_URL = "https://gcpa-enssat-24-25.s3.eu-west-3.amazonaws.com/"
@@ -39,6 +42,14 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
         val mdContent = dowloadMd(context, songPath.toString())
         val karaoke = mdContent?.let { parseMd(it) }
         val launchMusic = remember { mutableStateOf(false) }
+        var downloadedFile by remember { mutableStateOf<File?>(null) }
+
+        // Télécharger le fichier MP3 si nécessaire
+        downloadedFile = downloadSong(context, songPath.toString())
+
+        // Initialiser ExoPlayer
+        val exoPlayer = downloadedFile?.let { playSong(context, it) }
+
         // Affichage de l'écran
         Column(modifier = Modifier.padding(16.dp)) {
             // Bouton pour revenir à la liste des chansons
@@ -49,7 +60,14 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
                 Text(text = "Retour")
             }
             ElevatedButton(
-                onClick = { launchMusic.value = !launchMusic.value }
+                onClick = {
+                    launchMusic.value = !launchMusic.value
+                    if (launchMusic.value) {
+                        exoPlayer?.play()
+                    } else {
+                        exoPlayer?.stop()
+                    }
+                }
             ) {
                 Text(if (launchMusic.value) "Stop" else "Play")
             }
@@ -66,7 +84,6 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
                     // GET the data to good format
                     val textSong = parseMd(karaoke)
                     val parole = transformToData(textSong)
-
                     KarokeBox(parole)
                 }
             }
@@ -160,4 +177,3 @@ fun KarokeBox(parole: List<ParoleParse>){
     }
     KaraokeSimpleTextAnimate(duration,text,indexString)
 }
-
