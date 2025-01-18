@@ -31,7 +31,7 @@ fun AppNavigation(
         modifier = modifier
     ) {
         composable(route = "listSong") {
-            SongsList(songs = songs, navController = navController)
+            SongsList(initialSongs = songs, navController = navController)
         }
         composable(
             route = "lyrics/{songPath}",
