@@ -8,6 +8,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -32,6 +33,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
@@ -44,11 +46,16 @@ const val BASE_URL = "https://gcpa-enssat-24-25.s3.eu-west-3.amazonaws.com/"
 fun LyricsScreen(songPath: String?, navController: NavController) {
     val activity = LocalContext.current as Activity
     val context = LocalContext.current
+    var exoPlayer by remember { mutableStateOf<ExoPlayer?>(null) }
+    val playerObserver = remember { exoPlayer?.let { BackgroundObserver(it) } }
 
 
     // Forcer l'orientation paysage uniquement pour ce composable
     LaunchedEffect(Unit) {
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        if (playerObserver != null) {
+            ProcessLifecycleOwner.get().lifecycle.addObserver(playerObserver)
+        }
     }
 
     // Réinitialiser l'orientation quand on quitte cette page
@@ -60,11 +67,10 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
 
 
     if (songPath != "null") {
-        val mdContent = dowloadMd(context, songPath.toString())
-        val karaoke = mdContent?.let { parseMd(it) }
+        var mdContent = downloadMd(context, songPath.toString())
+        var karaoke = mdContent?.let { parseMd(it) }
         val launchMusic = rememberSaveable  { mutableStateOf(false) }
         var mP3File by remember { mutableStateOf<File?>(null) }
-        var exoPlayer by remember { mutableStateOf<ExoPlayer?>(null) }
 
 
         // Télécharger le fichier MP3 si nécessaire
@@ -92,6 +98,28 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
                 Button(onClick = { navController.navigateUp() }) {
                     Text(text = "Retour")
                 }
+                // Bouton de mise à jour de la liste
+                Button(
+                    onClick = {
+                            mdContent = songPath?.let {
+                                downloadAndUpdateMd(
+                                    context, mdPath = it
+                                )
+                            }
+                            karaoke = mdContent?.let { parseMd(it)}
+                            },
+                    modifier = Modifier
+                        .padding(bottom = 16.dp), // Espacement entre le bouton et la liste
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text(
+                        text = "Mettre à jour la liste",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
 
                 // Bouton "Play/Stop" aligné à droite
                 ElevatedButton(onClick = {
@@ -116,7 +144,7 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
                     )
                 } else {
                     // GET the data to good format
-                    val textSong = parseMd(karaoke)
+                    val textSong = parseMd(karaoke!!)
                     val parole = transformToData(textSong)
 
                     KarokeBox(parole, exoPlayer)
