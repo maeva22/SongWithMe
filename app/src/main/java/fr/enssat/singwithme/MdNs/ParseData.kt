@@ -51,6 +51,7 @@ fun transformToData(textsong:String): MutableList<ParoleParse> {
 
     }
     tab.removeFirst()
+    tab.removeLast()
     return tab
 
 }
