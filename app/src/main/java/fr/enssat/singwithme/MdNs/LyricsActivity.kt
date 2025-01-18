@@ -1,10 +1,13 @@
 package fr.enssat.singwithme.MdNs
 
+import android.app.Activity
+import android.content.pm.ActivityInfo
 import android.provider.ContactsContract.Data
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedButton
@@ -12,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -20,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
@@ -28,6 +33,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
 import kotlin.reflect.KProperty
@@ -37,6 +43,21 @@ const val BASE_URL = "https://gcpa-enssat-24-25.s3.eu-west-3.amazonaws.com/"
 
 @Composable
 fun LyricsScreen(songPath: String?, navController: NavController) {
+
+    val activity = LocalContext.current as Activity
+
+    // Forcer l'orientation paysage uniquement pour ce composable
+    LaunchedEffect(Unit) {
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+    }
+
+    // Réinitialiser l'orientation quand on quitte cette page
+    DisposableEffect(Unit) {
+        onDispose {
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        }
+    }
+
     val context = LocalContext.current
 
     if (songPath != "null") {
@@ -45,20 +66,26 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
         val launchMusic = rememberSaveable  { mutableStateOf(false) }
         // Affichage de l'écran
         Column(modifier = Modifier.padding(16.dp)) {
-            // Bouton pour revenir à la liste des chansons
-            Button(
-                modifier = Modifier.padding(bottom = 16.dp),
-                onClick = { navController.navigateUp() }
+            // Ligne contenant les boutons alignés
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp), // Ajout de l'espacement en bas
+                horizontalArrangement = Arrangement.SpaceBetween // Alignement des boutons
             ) {
-                Text(text = "Retour")
-            }
-            ElevatedButton(
-                onClick = { launchMusic.value = !launchMusic.value }
-            ) {
-                Text(if (launchMusic.value) "Stop" else "Play")
+                // Bouton "Retour" aligné à gauche
+                Button(onClick = { navController.navigateUp() }) {
+                    Text(text = "Retour")
+                }
+
+                // Bouton "Play/Stop" aligné à droite
+                ElevatedButton(onClick = { launchMusic.value = !launchMusic.value }) {
+                    Text(if (launchMusic.value) "Stop" else "Play")
+                }
             }
 
-            if(launchMusic.value){
+            // Si la musique est en cours de lecture
+            if (launchMusic.value) {
                 if (karaoke.isNullOrEmpty()) {
                     Text(
                         modifier = Modifier.padding(16.dp),
@@ -66,7 +93,6 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
                         text = "Impossible de charger les paroles."
                     )
                 } else {
-
                     // GET the data to good format
                     val textSong = parseMd(karaoke)
                     val parole = transformToData(textSong)
@@ -75,6 +101,7 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
                 }
             }
         }
+
     } else {
         Column(modifier = Modifier.padding(16.dp)) {
             // Bouton pour revenir à la liste des chansons
@@ -101,41 +128,53 @@ fun KaraokeSimpleText(text: String, progress: Float) {
     var width by remember { mutableIntStateOf(0) }
     var height by remember { mutableIntStateOf(0) }
 
-    Box(Modifier.padding(Dp(5f))) {
-        Text(
-            text = text,
-            color = Color.Red,
-            softWrap = false,
-            modifier = Modifier.onSizeChanged {
-                width = it.width
-                height = it.height
-            },
-            textAlign = TextAlign.Left
+    Box(
+        modifier = Modifier
+            .fillMaxSize() // Remplit tout l'écran
+            .padding(5.dp), // Ajoute un padding autour de la Box
+        contentAlignment = Alignment.Center
 
-        )
+    ) {
+        Box(
+            modifier = Modifier
+                .wrapContentSize()
+        ) {
+            Text(
+                text = text,
+                color = Color.Red,
+                softWrap = false,
+                modifier = Modifier.onSizeChanged {
+                    width = it.width
+                    height = it.height
+                },
+                textAlign = TextAlign.Left,
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 30.sp) // Taille du texte de 30 sp
 
-        Surface(
-            color = Color.Magenta, modifier = Modifier
-                .width(((width + 15).pxToDp()))
-                .height(height.pxToDp())
-                .padding(
-                    start = width.pxToDp() * progress,
-                    end = width.pxToDp() - (width.pxToDp() * progress),
-                    //top= 152.pxToDp(),
-                    //bottom = 0.pxToDp()
                 )
-        ) {}
 
-        Text(
-            text = text,
-            color = Color.Blue,
-            modifier = Modifier.width(width.pxToDp() * progress),
-            textAlign = TextAlign.Left,
-            softWrap = false
-        )
+            Surface(
+                color = Color.Magenta, modifier = Modifier
+                    .width(((width + 15).pxToDp()))
+                    .height(height.pxToDp())
+                    .padding(
+                        start = width.pxToDp() * progress,
+                        end = width.pxToDp() - (width.pxToDp() * progress),
+                        //top= 152.pxToDp(),
+                        //bottom = 0.pxToDp()
+                    )
+            ) {}
 
+            Text(
+                text = text,
+                color = Color.Blue,
+                modifier = Modifier.width(width.pxToDp() * progress),
+                textAlign = TextAlign.Left,
+                softWrap = false ,
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 30.sp)
+            )
+
+        }
     }
-
 
 }
 
