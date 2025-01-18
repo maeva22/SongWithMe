@@ -1,6 +1,5 @@
 package fr.enssat.singwithme.MdNs
 
-import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -12,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -26,7 +26,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.media3.exoplayer.offline.DownloadManager
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
 import java.io.File
@@ -42,20 +42,26 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
         val mdContent = dowloadMd(context, songPath.toString())
         val karaoke = mdContent?.let { parseMd(it) }
         val launchMusic = remember { mutableStateOf(false) }
-        var downloadedFile by remember { mutableStateOf<File?>(null) }
+        var mP3File by remember { mutableStateOf<File?>(null) }
+        var exoPlayer by remember { mutableStateOf<ExoPlayer?>(null) }
 
         // Télécharger le fichier MP3 si nécessaire
-        downloadedFile = downloadSong(context, songPath.toString())
+        LaunchedEffect(songPath) {
+            mP3File = songPath?.let { downloadSong(context, it) }
+        }
 
-        // Initialiser ExoPlayer
-        val exoPlayer = downloadedFile?.let { playSong(context, it) }
-
+        DisposableEffect(Unit) {
+            onDispose {
+                exoPlayer?.release() // Libérer le lecteur lorsqu'il n'est plus nécessaire
+            }
+        }
         // Affichage de l'écran
         Column(modifier = Modifier.padding(16.dp)) {
             // Bouton pour revenir à la liste des chansons
             Button(
                 modifier = Modifier.padding(bottom = 16.dp),
-                onClick = { navController.navigateUp() }
+                onClick = { navController.navigateUp()
+                    exoPlayer?.stop()}
             ) {
                 Text(text = "Retour")
             }
@@ -63,7 +69,8 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
                 onClick = {
                     launchMusic.value = !launchMusic.value
                     if (launchMusic.value) {
-                        exoPlayer?.play()
+                        // Initialiser ExoPlayer
+                        exoPlayer = mP3File?.let { playSong(context, it) }
                     } else {
                         exoPlayer?.stop()
                     }
@@ -93,9 +100,11 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
             // Bouton pour revenir à la liste des chansons
             Button(
                 modifier = Modifier.padding(bottom = 16.dp),
-                onClick = { navController.navigateUp() }
+                onClick = { navController.navigateUp()
+                }
             ) {
-                Text(text = "Retour")
+                Text(text = "Retour"
+                )
             }
             Text(
                 text = "Les paroles sont actuellement indisponible !",
