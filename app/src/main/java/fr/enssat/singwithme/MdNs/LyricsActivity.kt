@@ -224,7 +224,7 @@ fun KarokeBox(parole: List<ParoleParse>){
     val DataLine = parole[indexString]
 
     LaunchedEffect(indexString,indice) {
-            if (indexString < parole.size) {
+            if (indexString < parole.size-1) {
                 val duration = DataLine.timerEnd[indice] - DataLine.timerStart[indice]
 
                 delay(duration.toLong()) // Attendre la durée de l'animation
@@ -235,8 +235,6 @@ fun KarokeBox(parole: List<ParoleParse>){
                     indexString += 1  // Incrémenter l'indice pour le texte suivant
                     indice =0
                 }
-
-
 
             }
 
