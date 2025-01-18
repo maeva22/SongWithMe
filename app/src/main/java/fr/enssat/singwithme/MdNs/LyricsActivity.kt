@@ -2,12 +2,10 @@ package fr.enssat.singwithme.MdNs
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
-import android.provider.ContactsContract.Data
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedButton
@@ -20,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -31,20 +30,21 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
-import kotlin.reflect.KProperty
+import java.io.File
 
 
 const val BASE_URL = "https://gcpa-enssat-24-25.s3.eu-west-3.amazonaws.com/"
 
 @Composable
 fun LyricsScreen(songPath: String?, navController: NavController) {
-
     val activity = LocalContext.current as Activity
+    val context = LocalContext.current
+
 
     // Forcer l'orientation paysage uniquement pour ce composable
     LaunchedEffect(Unit) {
@@ -58,12 +58,27 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
         }
     }
 
-    val context = LocalContext.current
 
     if (songPath != "null") {
         val mdContent = dowloadMd(context, songPath.toString())
         val karaoke = mdContent?.let { parseMd(it) }
         val launchMusic = rememberSaveable  { mutableStateOf(false) }
+        var mP3File by remember { mutableStateOf<File?>(null) }
+        var exoPlayer by remember { mutableStateOf<ExoPlayer?>(null) }
+
+
+        // Télécharger le fichier MP3 si nécessaire
+        LaunchedEffect(songPath) {
+            mP3File = songPath?.let { downloadSong(context, it) }
+        }
+
+        // Libérer le lecteur lorsqu'il n'est plus nécessaire
+        DisposableEffect(Unit) {
+            onDispose {
+                exoPlayer?.release()
+            }
+        }
+
         // Affichage de l'écran
         Column(modifier = Modifier.padding(16.dp)) {
             // Ligne contenant les boutons alignés
@@ -79,7 +94,14 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
                 }
 
                 // Bouton "Play/Stop" aligné à droite
-                ElevatedButton(onClick = { launchMusic.value = !launchMusic.value }) {
+                ElevatedButton(onClick = {
+                    launchMusic.value = !launchMusic.value
+                    if (launchMusic.value) {
+                        // Initialiser ExoPlayer
+                        exoPlayer = mP3File?.let { playSong(context, it) }
+                    } else {
+                        exoPlayer?.stop()
+                    }}) {
                     Text(if (launchMusic.value) "Stop" else "Play")
                 }
             }
@@ -97,7 +119,7 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
                     val textSong = parseMd(karaoke)
                     val parole = transformToData(textSong)
 
-                    KarokeBox(parole)
+                    KarokeBox(parole, exoPlayer)
                 }
             }
         }
@@ -179,7 +201,7 @@ fun KaraokeSimpleText(text: String, progress: Float) {
 }
 
 @Composable
-fun KaraokeSimpleTextAnimate(Dataline:ParoleParse, indice: Int) {
+fun KaraokeSimpleTextAnimate(Dataline: ParoleParse, indice: Int, exoPlayer: ExoPlayer?) {
 
     val karaokeAnimation = remember  { Animatable(0f) }
     var TargetValue by rememberSaveable  { mutableFloatStateOf(0f) }
@@ -191,6 +213,10 @@ fun KaraokeSimpleTextAnimate(Dataline:ParoleParse, indice: Int) {
             if(indice == 0){
                 karaokeAnimation.snapTo(0f)
                 TargetValue=0f
+                if (exoPlayer != null) {
+                    delay(Dataline.timerStart.first()-exoPlayer.currentPosition)
+                }
+
             }
             val duration = Dataline.timerEnd[indice] - Dataline.timerStart[indice]
             var len = (Dataline.txt[indice].length).toFloat()
@@ -216,22 +242,27 @@ fun KaraokeSimpleTextAnimate(Dataline:ParoleParse, indice: Int) {
     KaraokeSimpleText(text, savedValue)
 }
 @Composable
-fun KarokeBox(parole: List<ParoleParse>){
+fun KarokeBox(parole: List<ParoleParse>, exoPlayer: ExoPlayer?){
 
     var indexString by rememberSaveable  { mutableIntStateOf(0) }
     var indice by rememberSaveable  { mutableIntStateOf(0) }
+    var timerSong by rememberSaveable { mutableLongStateOf(0) }
 
     val DataLine = parole[indexString]
 
     LaunchedEffect(indexString,indice) {
             if (indexString < parole.size-1) {
-                val duration = DataLine.timerEnd[indice] - DataLine.timerStart[indice]
 
-                delay(duration.toLong()) // Attendre la durée de l'animation
+                val duration = DataLine.timerEnd[indice] - DataLine.timerStart[indice]
+                if (exoPlayer != null) {
+                    timerSong = exoPlayer.currentPosition
+                }
+                delay(parole[indexString].timerEnd[indice] - timerSong)// Attendre la durée de l'animation
 
                 if( indice < DataLine.txt.size-1 ){
                     indice+=1
                 }else{
+
                     indexString += 1  // Incrémenter l'indice pour le texte suivant
                     indice =0
                 }
@@ -241,7 +272,7 @@ fun KarokeBox(parole: List<ParoleParse>){
 
     }
 
-    KaraokeSimpleTextAnimate(DataLine,indice)
+    KaraokeSimpleTextAnimate(DataLine,indice,exoPlayer)
 
 
 }
