@@ -116,7 +116,7 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
                 ) {
                     Text(
                         text = "Mettre à jour la liste",
-                        color = Color.White,
+                        color = Color.Black,
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
