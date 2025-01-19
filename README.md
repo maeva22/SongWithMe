@@ -4,6 +4,10 @@ Projet réalisé pour Maëva Desablens et Nathan Sans
 
 ## Présentation technique
 
+## APK : 
+[text](SongWithMeMdNs.apk)
+
+
 ### Organisation du Projet
 
 Le projet a été segmenté en plusieurs fichiers pour faciliter lLa lisibilité, la modification et l'adaptation du code.
@@ -17,6 +21,7 @@ Chaque fichier est chargé d'une tâche spécifique :
 - Téléchargement des fichiers `.mp3`  
 - Téléchargement des fichiers `.md`  
 - Gestion de la navigation dans l'application  
+
 
 La navigation entre les pages est assurée par un système appelé **AppNavigation**, permettant de passer facilement du menu principal, à une page d'erreur ou à la page de karaoké.
 
