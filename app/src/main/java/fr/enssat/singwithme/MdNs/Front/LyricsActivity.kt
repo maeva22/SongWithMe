@@ -1,4 +1,4 @@
-package fr.enssat.singwithme.MdNs
+package fr.enssat.singwithme.MdNs.Front
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
@@ -36,6 +36,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
+import fr.enssat.singwithme.MdNs.Back.BackgroundObserver
+import fr.enssat.singwithme.MdNs.Back.ParoleParse
+import fr.enssat.singwithme.MdNs.Back.downloadAndUpdateMd
+import fr.enssat.singwithme.MdNs.Back.downloadMd
+import fr.enssat.singwithme.MdNs.Back.downloadSong
+import fr.enssat.singwithme.MdNs.Back.parseMd
+import fr.enssat.singwithme.MdNs.Back.playSong
+import fr.enssat.singwithme.MdNs.Back.transformToData
 import kotlinx.coroutines.delay
 import java.io.File
 
@@ -106,7 +114,7 @@ fun LyricsScreen(songPath: String?, navController: NavController) {
                                     context, mdPath = it
                                 )
                             }
-                            karaoke = mdContent?.let { parseMd(it)}
+                            karaoke = mdContent?.let { parseMd(it) }
                             },
                     modifier = Modifier
                         .padding(bottom = 16.dp), // Espacement entre le bouton et la liste

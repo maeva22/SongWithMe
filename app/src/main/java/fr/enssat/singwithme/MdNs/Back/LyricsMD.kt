@@ -1,7 +1,8 @@
-package fr.enssat.singwithme.MdNs
+package fr.enssat.singwithme.MdNs.Back
 
 import android.content.Context
 import android.util.Log
+import fr.enssat.singwithme.MdNs.Front.BASE_URL
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
@@ -20,7 +21,7 @@ data class Karaoke(
 fun downloadMd(context: Context, mdPath: String): String? {
 
     val client = OkHttpClient()
-    val request = Request.Builder().url(BASE_URL+mdPath).build()
+    val request = Request.Builder().url(BASE_URL +mdPath).build()
     val lyricsFile = File(context.cacheDir, mdPath.substringAfterLast('/'))
 
     if (lyricsFile.exists()) {

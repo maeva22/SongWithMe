@@ -1,4 +1,4 @@
-package fr.enssat.singwithme.MdNs
+package fr.enssat.singwithme.MdNs.Back
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver

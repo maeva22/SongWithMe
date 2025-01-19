@@ -7,7 +7,10 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.navigation.compose.rememberNavController
+import fr.enssat.singwithme.MdNs.Back.downloadAndUpdateJson
+import fr.enssat.singwithme.MdNs.Back.loadJson
+import fr.enssat.singwithme.MdNs.Back.parseJson
+import fr.enssat.singwithme.MdNs.Front.ErrorConnexion
 import fr.enssat.singwithme.MdNs.Navigation.AppNavigation
 import fr.enssat.singwithme.MdNs.ui.theme.SongWithMeTheme
 

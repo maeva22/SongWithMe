@@ -1,4 +1,4 @@
-package fr.enssat.singwithme.MdNs
+package fr.enssat.singwithme.MdNs.Back
 
 data class ParoleParse(
     var txt: MutableList<String> = mutableListOf<String>(),
@@ -9,7 +9,7 @@ data class ParoleParse(
     var totalTimer: Int=0
 )
 
-fun initParoleParle() : ParoleParse{
+fun initParoleParle() : ParoleParse {
     return ParoleParse()
 }
 

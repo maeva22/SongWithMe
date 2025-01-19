@@ -1,4 +1,4 @@
-package fr.enssat.singwithme.MdNs
+package fr.enssat.singwithme.MdNs.Front
 
 import android.net.Uri
 import android.util.Log
@@ -34,6 +34,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import fr.enssat.singwithme.MdNs.Back.ListMusic
+import fr.enssat.singwithme.MdNs.Back.downloadAndUpdateJson
+import fr.enssat.singwithme.MdNs.Back.loadJson
+import fr.enssat.singwithme.MdNs.Back.parseJson
+import fr.enssat.singwithme.MdNs.JSON_URL
 
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,10 +1,11 @@
-package fr.enssat.singwithme.MdNs
+package fr.enssat.singwithme.MdNs.Back
 
 import android.content.Context
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
+import fr.enssat.singwithme.MdNs.Front.BASE_URL
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File

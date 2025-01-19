@@ -1,4 +1,4 @@
-package fr.enssat.singwithme.MdNs
+package fr.enssat.singwithme.MdNs.Back
 
 import android.content.Context
 import com.google.gson.Gson
@@ -7,8 +7,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
-import java.net.URL
-
 
 
 data class ListMusic(

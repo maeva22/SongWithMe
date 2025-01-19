@@ -2,17 +2,15 @@ package fr.enssat.singwithme.MdNs.Navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.Navigation
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import fr.enssat.singwithme.MdNs.ErrorConnexion
-import fr.enssat.singwithme.MdNs.ListMusic
-import fr.enssat.singwithme.MdNs.LyricsScreen
-import fr.enssat.singwithme.MdNs.SongsList
+import fr.enssat.singwithme.MdNs.Front.ErrorConnexion
+import fr.enssat.singwithme.MdNs.Back.ListMusic
+import fr.enssat.singwithme.MdNs.Front.LyricsScreen
+import fr.enssat.singwithme.MdNs.Front.SongsList
 
 /**
  * Provides Navigation graph for the application.
