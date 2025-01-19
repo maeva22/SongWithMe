@@ -1,53 +1,76 @@
 # Présentation du Projet SongWithMe
 
-Projet fait pour Maëva Desablens et Nathan Sans
+Projet réalisé pour Maëva Desablens et Nathan Sans
 
-## Présentationt technique 
+## Présentation technique
 
 ### Organisation du Projet
 
-Le projet a été segmenter en plusieur fichier pour faciliter la lisibiliter et la faciliter de modification / amélioration. 
+Le projet a été segmenté en plusieurs fichiers pour faciliter lLa lisibilité, la modification et l'adaptation du code.
 
-Ainsi on a un fichier charger :
-  - Du lancement de l'application
-  - De l'affichage d'erreur
-  - D'afficher la liste de musique
-  - D'afficher les paroles
-  - De transformer les fichier de musique en structure de donnée
-  - Du téléchargement du fichier .mp3
-  - Du téléchargement du fihcier .md
-  - D'un fichier de navigation
+Chaque fichier est chargé d'une tâche spécifique :  
+- Lancement de l'application  
+- Gestion de l'affichage des erreurs  
+- Affichage de la liste des musiques  
+- Affichage des paroles  
+- Transformation des fichiers de musique en structure de données  
+- Téléchargement des fichiers `.mp3`  
+- Téléchargement des fichiers `.md`  
+- Gestion de la navigation dans l'application  
 
-Notre navigation entre les pages se fait grace a un "AppNavigation". Ce dernier nous permet de faciliter le passage du menu a une page d'erreur ou a la page de Karaoké.
+La navigation entre les pages est assurée par un système appelé **AppNavigation**, permettant de passer facilement du menu principal, à une page d'erreur ou à la page de karaoké.
+
+---
 
 ### Téléchargement des données
 
-Nos donnée son télécharger et stoquer dans un cache et dans des fichier. Les musique sont elle télécharger en durs sur le téléphone. 
+Les données sont téléchargées et stockées dans un cache ou dans des fichiers locaux. Les musiques sont enregistrées directement sur l’appareil.
 
-Un bouton a été mis en place pour force l'application a recharger les donnée. Ainsi a chaque lancement l'application ne ferra pas de requête pour récuperer de nouvelle donnée.
+Un bouton a été ajouté pour forcer l’application à recharger les données. Ainsi, lors de chaque lancement, l’application n’effectue pas de requête pour récupérer des données supplémentaires. Sauf lors de son premier lancement.
 
-### Traitement des fichier .md
+---
 
-Pour faciliter le traitement des donner nous avons appliquer la regex suivante : 
+### Traitement des fichiers `.md`
 
-</code>(?=(?>\{ *([^\n {}]+) *\}([^\n{}]+\n?)(?>\{ *([^\n {}]+) *\}(\n)?)))</code>
+Pour faciliter le traitement des données, la regex suivante a été appliquée :  
 
-Cette dernièrr permet de nous faire des packs de données. Une fois récuperer elle seront traiter et ajouter a une structure.
+```regex
+(?=(?>\{ *([^\n {}]+) *\}([^\n{}]+\n?)(?>\{ *([^\n {}]+) *\}(\n)?)))
+```
+Cette regex permet de regrouper les données en "packs". Une fois récupérées, elles sont traitées et ajoutées à une structure.  
 
-Ainsi a la fin on aura un tableau de cette structure pour chaque ligne. Dans cette structure on aura de nouveau des tableau pour simuler le cas ou l'on peu avoir plusieur limiteur de temsp au seins d'une seule et même ligne. 
-Il suffira donc de pacourire tout les tableau de la structure puis de passer a la suivante dans le tebleau pour parcourir toutes les paroles. 
+Ainsi, à la fin, nous obtenons :  
+- Un tableau de cette dite structure où chaque ligne y est representer.  
+- Dans chaque structure, des sous-tableaux simulent les cas où plusieurs marqueurs de temps sont présents dans cette même ligne.  
 
-Pour s'assurer de la stabiliter un sécuriter a été ajouter a notre code de telle sorte que nous ne commençons l'effet de karaoké sur un parole temps que le temps de début de la ligne et de le temps du player ne sont pas identique. 
+Pour parcourir toutes les paroles :  
+1. Il suffit de parcourir tous les tableaux de chaque structure.  
+2. Puis, passer à la structure suivante dans le tableau principal.  
 
-### Amélioration Possible 
+Pour garantir la stabilité, une sécurité a été ajoutée au code :  
+- L’effet karaoké ne commence que lorsque le temps de début de la ligne correspond exactement au temps du lecteur audio.  
 
-Le temps ne nous a pas suffit pour améliorer autant que shouaiter le projet nous avons donc décrit ci dessous ce que nous aurions aimer améliorer.
+---
 
-#### Le format de la regex : 
-Si la regex fonctionne pour les fichier test, les regex sont peu flexible. Donc en cas d'une petit modification le code ne fonctionerais plus comme voulue. Il faudrais donc vérifier le bon format de nos fichier. 
-Pour ce faire plusieur méthode son possible. On pourrais ajouter des regex de verification pour au moins s'assurer que le fichier sois dans le bon format ( ie, temps au fromat  { mm:ss }, temps pour chaque début de ligne, ... ).
+### Améliorations possibles
 
-Une autre vérification serait de s'assurer que notre structure est bien rmeplis et ne contient pas des valeur trop étrange, comme un temps plus petit d'une ligne a l'autre. 
+Le temps imparti ne nous a pas permis d’apporter toutes les améliorations souhaitées au projet. Voici ce que nous aurions aimé améliorer :
 
-D'autre amélioration aurait pus être aussi appliquer sur l'annimation pour que la barre d'avancement soit déjà en mouvement avant les paroles. Par ici on entend que la barre de progression avanerais dans la vide pour que l'utilisateur comprenne quand la ligne commencera. 
+#### 1. Le format de la regex
+Bien que la regex fonctionne pour les fichiers tests, elle reste peu flexible. Une petite modification du fichier pourrait empêcher le code de fonctionner correctement.  
+
+Pour améliorer cela, plusieurs méthodes sont possibles :  
+- Ajouter des regex de validation pour s’assurer que le fichier respecte un format strict (par exemple : temps au format `{ mm:ss }`, présence d’un temps pour chaque début de ligne, etc.).  
+- Vérifier que la structure est correctement remplie et qu’elle ne contient pas de valeurs incohérentes (par exemple : un temps plus petit d’une ligne à l’autre).  
+
+#### 2. L’animation de la barre de progression
+Nous aurions également souhaité améliorer l’animation de la barre de progression.  
+
+Actuellement :  
+- La barre commence à avancer seulement lorsque les paroles débutent.  
+
+Amélioration envisagée :  
+- Faire avancer la barre dans le vide avant que les paroles ne commencent.  
+- Cela permettrait à l’utilisateur de visualiser quand la ligne débutera, rendant l’interface plus intuitive.
+
 
